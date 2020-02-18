@@ -122,14 +122,42 @@ def cluster_random(word_to_paraphrases_dict, word_to_k_dict):
     """
     clusterings = {}
 
+    random.seed(123)
+
     for target_word in word_to_paraphrases_dict.keys():
         paraphrase_list = word_to_paraphrases_dict[target_word]
         k = word_to_k_dict[target_word]
         # TODO: Implement
-        clusterings[target_word] = None
+        paraphrase_list_check = paraphrase_list.copy()
+        list_of_paraphrases = []
+        i = 0
+        while len(paraphrase_list_check) != 0:
+            if i == k:
+                i = 0
+            word = random.choice(paraphrase_list)
+            if word in paraphrase_list_check:
+                paraphrase_list_check.remove(word)
+            if len(list_of_paraphrases) < i + 1:
+                lst = []
+                lst.append(word)
+                list_of_paraphrases.append(lst)
+            else:
+                if word not in list_of_paraphrases[i]:
+                    list_of_paraphrases[i].append(word)
+            i += 1
+
+        clusterings[target_word] = list_of_paraphrases
 
     return clusterings
 
+# word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/dev_input.txt')
+# gold_clusterings = load_output_file('data/dev_output.txt')
+# predicted_clusterings = cluster_random(word_to_paraphrases_dict, word_to_k_dict)
+# evaluate_clusterings(gold_clusterings, predicted_clusterings)
+#
+# word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/test_input.txt')
+# predicted_clusterings = cluster_random(word_to_paraphrases_dict, word_to_k_dict)
+# write_to_output_file('test_output_random.txt', predicted_clusterings)
 
 # TASK 2.2
 def cluster_with_sparse_representation(word_to_paraphrases_dict, word_to_k_dict):
