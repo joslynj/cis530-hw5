@@ -2,6 +2,9 @@ from pymagnitude import *
 from itertools import combinations
 from prettytable import PrettyTable
 from sklearn.cluster import KMeans
+from sklearn.cluster import MiniBatchKMeans
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import SpectralClustering
 import random
 
 
@@ -110,8 +113,23 @@ def evaluate_clusterings(gold_clusterings, predicted_clusterings):
     print(table)
     print(f'=> Average Paired F-Score:  {average_f_score:.4f}')
 
+def create_PPMI_matrix(term_context_matrix):
 
-# TASK 2.1
+    num_terms = term_context_matrix.shape[0]
+    e = 1e-6 # smoothing factor to prevent divison-by-zero
+    total = np.sum(term_context_matrix + e)
+    numerator = (term_context_matrix+  e) / total
+    context_totals = np.sum(numerator, axis=0) # total context counts (sum columns)
+    word_totals = np.sum(numerator, axis=1) # total word counts (sum rows)
+    
+    denominator = np.outer(context_totals, word_totals)
+    pmi_matrix = np.divide(numerator, denominator)
+    pmi_matrix = np.log2(pmi_matrix)
+    ppmi_matrix = np.maximum(pmi_matrix, 0.)
+    
+    return ppmi_matrix
+
+# TASK 3.1
 def cluster_random(word_to_paraphrases_dict, word_to_k_dict):
     """
     Clusters paraphrases randomly
@@ -121,7 +139,7 @@ def cluster_random(word_to_paraphrases_dict, word_to_k_dict):
     where each list corresponds to a cluster
     """
     clusterings = {}
-    random.seed(124)
+    random.seed(123)
 
     for target_word in word_to_paraphrases_dict.keys():
         paraphrase_list = word_to_paraphrases_dict[target_word]
@@ -132,7 +150,7 @@ def cluster_random(word_to_paraphrases_dict, word_to_k_dict):
         i = 0
         while len(paraphrase_list_check) != 0:
             if i == k:
-                i = 0
+                i = 0 
             word = random.choice(paraphrase_list)
             if word in paraphrase_list_check:
                 paraphrase_list_check.remove(word)
@@ -149,7 +167,7 @@ def cluster_random(word_to_paraphrases_dict, word_to_k_dict):
 
     return clusterings
 
-# TASK 2.2
+# TASK 3.2
 def cluster_with_sparse_representation(word_to_paraphrases_dict, word_to_k_dict):
     """
     Clusters paraphrases using sparse vector representation
@@ -168,14 +186,23 @@ def cluster_with_sparse_representation(word_to_paraphrases_dict, word_to_k_dict)
         # TODO: Implement
         list_of_paraphrases = []
         num_words = len(paraphrase_list)
-
         vectors_list = vectors.query(paraphrase_list)
 
-        kmeans = KMeans(n_clusters=k).fit(vectors_list) # kmeans.labels_: list of labels for each data point (paraphrase word)
+        ### Experiment with removing all-zero columns/dimensions ###
+        # np_vectors = np.array(vectors_list)
+        # columns = np.argwhere(np.all(np_vectors[..., :] == 0, axis=0))
+        # vectors_list = np.delete(np_vectors, columns, axis=1)
+
+        ### Experiment with different clustering algorithms ###
+        # clusters = KMeans(n_clusters=k).fit(vectors_list) # 0.2555
+        clusters = MiniBatchKMeans(n_clusters=k).fit(vectors_list) # 0.2662
+        # clusters = SpectralClustering(n_clusters=k).fit(vectors_list) # 0.2351
+        # clusters = AgglomerativeClustering(n_clusters=k).fit(vectors_list) # 0.2640
+        
         for i in range(k): # for each cluster
             lst = []
             for word_ind in range(num_words):
-                if kmeans.labels_[word_ind] == i: # if label is i (word belongs to ith cluster)
+                if clusters.labels_[word_ind] == i: # if label is i (word belongs to ith cluster)
                     lst.append(paraphrase_list[word_ind])
             list_of_paraphrases.append(lst)
         clusterings[target_word] = list_of_paraphrases
@@ -183,7 +210,7 @@ def cluster_with_sparse_representation(word_to_paraphrases_dict, word_to_k_dict)
     return clusterings
 
 
-# TASK 2.3
+# TASK 3.3
 def cluster_with_dense_representation(word_to_paraphrases_dict, word_to_k_dict):
     """
     Clusters paraphrases using dense vector representation
@@ -193,19 +220,47 @@ def cluster_with_dense_representation(word_to_paraphrases_dict, word_to_k_dict):
     where each list corresponds to a cluster
     """
     # Note: any vector representation should be in the same directory as this file
-    vectors = Magnitude("GoogleNews-vectors-negative300.filter.magnitude")
+    google_vectors = Magnitude("vectors/GoogleNews-vectors-negative300.filter.magnitude") # KMeans: 0.3225
+    # vectors = Magnitude("vectors/GoogleNews-vectors-negative300.magnitude") # KMeans: 0.3017 AG: 0.3084
+    wiki_vectors = Magnitude("vectors/wiki-news-300d-1M-subword.magnitude") # KMeans: 0.3302 AG: 0.3249 MiniBatch: 0.3313
+    crawl_vectors = Magnitude("vectors/crawl-300d-2M.magnitude") # KMeans: 0.3508 AG: 0.3256 MiniBatch: 0.3427
+    # vectors = Magnitude("vectors/glove.twitter.27B.25d.magnitude") # KMeans: 0.2327 AG: 0.2340 MiniBatch: 0.2424
+    # glove_vectors = Magnitude("vectors/glove-lemmatized.6B.300d.magnitude") # MiniBatch: 0.2739 AG: 0.2659
+    # glove_vectors = Magnitude("vectors/glove.6B.300d.magnitude")
+    # twitter_vectors = Magnitude("vectors/glove.twitter.27B.200d.magnitude") # MiniBatch: 0.2623
+    # vectors = Magnitude(crawl_vectors, twitter_vectors) # KMeans: 0.3017
+    # vectors = Magnitude(crawl_vectors, google_vectors) # KMeans: 0.3315
+    # vectors = Magnitude(crawl_vectors, glove_vectors) # KMeans: 0.3026
+    # vectors = Magnitude(wiki_vectors, twitter_vectors) # KMeans: 0.2887
+    vectors = Magnitude(wiki_vectors, google_vectors) # 0.3290
+
     clusterings = {}
 
     for target_word in word_to_paraphrases_dict.keys():
         paraphrase_list = word_to_paraphrases_dict[target_word]
         k = word_to_k_dict[target_word]
         # TODO: Implement
-        clusterings[target_word] = None
+        vectors_list = vectors.query(paraphrase_list)
+
+        # Create k clusters
+        # clusters = AgglomerativeClustering(n_clusters=k).fit(vectors_list)
+        # clusters = MiniBatchKMeans(n_clusters=k).fit(vectors_list)
+        # clusters = SpectralClustering(n_clusters=k).fit(vectors_list)
+        clusters = KMeans(n_clusters=k).fit(vectors_list)
+        cluster_dict = {i: np.where(clusters.labels_ == i)[0] for i in range(clusters.n_clusters)}
+        list_of_paraphrases = []
+        for key, value in cluster_dict.items():
+            paraphrases = []
+            for i in value:
+                paraphrases.append(paraphrase_list[i])
+            list_of_paraphrases.append(paraphrases)
+
+        clusterings[target_word] = list_of_paraphrases
 
     return clusterings
 
 
-# TASK 2.4
+# TASK 3.4
 def cluster_with_no_k(word_to_paraphrases_dict):
     """
     Clusters paraphrases using any vector representation
@@ -214,7 +269,7 @@ def cluster_with_no_k(word_to_paraphrases_dict):
     where each list corresponds to a cluster
     """
     # Note: any vector representation should be in the same directory as this file
-    vectors = Magnitude("GoogleNews-vectors-negative300.filter.magnitude")
+    vectors = Magnitude("vectors/GoogleNews-vectors-negative300.filter.magnitude")
     clusterings = {}
 
     for target_word in word_to_paraphrases_dict.keys():
@@ -227,20 +282,48 @@ def cluster_with_no_k(word_to_paraphrases_dict):
 def main():
     # pass
 
-    # Task 3.1: Cluster Randomly
-    word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/dev_input.txt')
+    ##### Task 3.1: Cluster Randomly #####
+    # word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/dev_input.txt')
+    # gold_clusterings = load_output_file('data/dev_output.txt')
+    # predicted_clusterings = cluster_random(word_to_paraphrases_dict, word_to_k_dict)
+    # evaluate_clusterings(gold_clusterings, predicted_clusterings)
+
+    # word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/test_input.txt')
+    # predicted_clusterings = cluster_random(word_to_paraphrases_dict, word_to_k_dict)
+    # write_to_output_file('test_output_random.txt', predicted_clusterings)
+
+    ##### Task 3.2 Cluster with Sparse Representations #####
+    # word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/dev_input.txt')
+    # gold_clusterings = load_output_file('data/dev_output.txt')
+    # predicted_clusterings = cluster_with_sparse_representation(word_to_paraphrases_dict, word_to_k_dict)
+    # evaluate_clusterings(gold_clusterings, predicted_clusterings)
+
+    # word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/test_input.txt')
+    # predicted_clusterings = cluster_with_sparse_representation(word_to_paraphrases_dict, word_to_k_dict)
+    # write_to_output_file('test_output_sparse.txt', predicted_clusterings)
+
+    ##### Task 3.3 Cluster with Dense Representations #####
+    # word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/dev_input.txt')
+    # gold_clusterings = load_output_file('data/dev_output.txt')
+    # predicted_clusterings = cluster_with_dense_representation(word_to_paraphrases_dict, word_to_k_dict)
+    # evaluate_clusterings(gold_clusterings, predicted_clusterings)
+
+    # word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/test_input.txt')
+    # predicted_clusterings = cluster_with_dense_representation(word_to_paraphrases_dict, word_to_k_dict)
+    # write_to_output_file('test_output_dense.txt', predicted_clusterings)
+
+    ##### Task 3.4 Cluster withour K #####
+    '''
+    word_to_paraphrases_dict, _ = load_input_file('data/dev_input.txt')
     gold_clusterings = load_output_file('data/dev_output.txt')
-    predicted_clusterings = cluster_random(word_to_paraphrases_dict, word_to_k_dict)
-    evaluate_clusterings(gold_clusterings, predicted_clusterings)
+    predicted_clusterings = cluster_with_no_k(word_to_paraphrases_dict)
+    valuate_clusterings(gold_clusterings, predicted_clusterings)
 
-    word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/test_input.txt')
-    predicted_clusterings = cluster_random(word_to_paraphrases_dict, word_to_k_dict)
-    write_to_output_file('test_output_random.txt', predicted_clusterings)
-
-    # Task 3.2 Cluster with Sparse Representations
-    word_to_paraphrases_dict, word_to_k_dict = load_input_file('data/test_input.txt')
-    predicted_clusterings = cluster_with_sparse_representation(word_to_paraphrases_dict, word_to_k_dict)
-    write_to_output_file('test_output_sparse.txt', predicted_clusterings)
+    word_to_paraphrases_dict, _ = load_input_file('data/test_nok_input.txt')
+    predicted_clusterings = cluster_with_no_k(word_to_paraphrases_dict)
+    write_to_output_file('test_nok_output.txt', predicted_clusterings)
+    '''
+    
 
 if __name__ == '__main__':
     main()
