@@ -36,10 +36,10 @@ Using agglomerative with linkage = "single" <3 with various vector models
 * fb_wiki: wiki-news-300d-1M.magnitude
 * filter_news: GoogleNews-vectors-negative300.filter.magnitude
 * news: GoogleNews-vectors-negative300.magnitude
-* glove_crawl:glove.840B.300d.magnitude
+* glove_crawl: glove.840B.300d.magnitude
 
 ## Task 3.4 - Clustering without K ##
-#### Dev set f-scores ####
+### Dev set f-scores ###
 | Vector Model  | fb_crawl | filtered_news | fb_wiki  | |
 | ------------- | :-------------: | :-------------: | :-------------: | :-------------: |
 | K-Means, k = [2,6] |  0.3894 |   |  |  |
@@ -56,7 +56,7 @@ Using agglomerative with linkage = "single" <3 with various vector models
 | Spectral clustering,  k = [2,8] | 0.3597| | | |
 
 
-#### Leaderboard Scores ####
+### Leaderboard Scores ###
 * KMeans, [2, 6] 0.4058
 * KMeans, [2,7] 0.4148
 * KMeans, [2, 6] 0.4058
