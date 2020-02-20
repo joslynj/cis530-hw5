@@ -15,7 +15,7 @@ Test scores:
 | Spectral clustering with PPMI | 0.384 |  |
 
 ## Task 3.3 - Dense Vectors ###
-Test scores:
+### Test scores ###
 | Vector Model  | fb_crawl | fb_wiki_subword + filtered_news | fb_wiki_subword + news | fb_crawl + filtered_news |
 | ------------- | :-------------: | :-------------: | :-------------: | :-------------: |
 | K-Means | 0.459  | 0.429 | 0.422 | |
@@ -23,6 +23,14 @@ Test scores:
 | Agglomerative clustering | 0.442| | | 0.433|
 | Spectral clustering | 0.418 | | | |
 
+### Leaderboard scores ###
+Using agglomerative with linkage = "single" <3 with various vector models
+* fb_wiki_vectors + fb_crawl_vectors: 0.5295
+* fb_crawl_vectors + filtered_news_vectors: 0.5194
+* fb_wiki_vectors + fb_crawl_vectors: 0.5124
+
+
+### Vector Models ###
 * fb_crawl: crawl-300d-2M.magnitude
 * fb_wiki_subword: wiki-news-300d-1M-subword.magnitude
 * fb_wiki: wiki-news-300d-1M.magnitude
