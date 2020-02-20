@@ -7,17 +7,17 @@ Assignment writeup: http://computational-linguistics-class.org/homework/vector-s
 ## Task 3.2 - Sparse Vectors ###
 Test scores:
 | Vector Model  | D=500, W=5 | D=500, W=3 | 
-| ------------- | ------------- | ------------- |
-| K-Means with PPMI | 0.387 | N/A |
+| ------------- | :-------------: | :-------------: |
+| K-Means with PPMI | 0.387 |  |
 | MiniBatch K-Means | 0.373 | 0.373 |
 | MiniBatch K-Means  with PPMI | 0.405 | 0.386 |
-| Agglomerative clustering with PPMI | 0.388 | N/A | 
-| Spectral clustering with PPMI | 0.384 | N/A |
+| Agglomerative clustering with PPMI | 0.388 |  | 
+| Spectral clustering with PPMI | 0.384 |  |
 
 ## Task 3.3 - Dense Vectors ###
 Test scores:
 | Vector Model  | fb_crawl | wiki_vectors + news_filtered | wiki_vectors + news_vectors | fb_crawl + news_filtered |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
+| ------------- | :-------------: | :-------------: | :-------------: | :-------------: |
 | K-Means | 0.459  | 0.429 | 0.422 | |
 | MiniBatch K-Means  | 0.456  | | | |
 | Agglomerative clustering | 0.442| | | 0.433|
