@@ -16,9 +16,15 @@ Test scores:
 
 ## Task 3.3 - Dense Vectors ###
 Test scores:
-| Vector Model  | fb_crawl | wiki_vectors + news_filtered | wiki_vectors + news_vectors | fb_crawl + news_filtered |
+| Vector Model  | fb_crawl | fb_wiki + filtered_news | fb_wiki + news | fb_crawl + filtered_news |
 | ------------- | :-------------: | :-------------: | :-------------: | :-------------: |
 | K-Means | 0.459  | 0.429 | 0.422 | |
 | MiniBatch K-Means  | 0.456  | | | |
 | Agglomerative clustering | 0.442| | | 0.433|
 | Spectral clustering | 0.418 | | | |
+
+fb_crawl: crawl-300d-2M.magnitude
+fb_wiki_crawl: wiki-news-300d-1M-subword.magnitude
+filter_news: GoogleNews-vectors-negative300.filter.magnitude
+news: GoogleNews-vectors-negative300.magnitude
+glove_crawl:glove.840B.300d.magnitude
