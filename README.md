@@ -23,8 +23,8 @@ Test scores:
 | Agglomerative clustering | 0.442| | | 0.433|
 | Spectral clustering | 0.418 | | | |
 
-fb_crawl: crawl-300d-2M.magnitude
-fb_wiki_crawl: wiki-news-300d-1M-subword.magnitude
-filter_news: GoogleNews-vectors-negative300.filter.magnitude
-news: GoogleNews-vectors-negative300.magnitude
-glove_crawl:glove.840B.300d.magnitude
+* fb_crawl: crawl-300d-2M.magnitude
+* fb_wiki_crawl: wiki-news-300d-1M-subword.magnitude
+* filter_news: GoogleNews-vectors-negative300.filter.magnitude
+* news: GoogleNews-vectors-negative300.magnitude
+* glove_crawl:glove.840B.300d.magnitude
