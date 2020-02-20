@@ -25,7 +25,7 @@ Test scores:
 
 ### Leaderboard scores ###
 Using agglomerative with linkage = "single" <3 with various vector models
-* fb_wiki_vectors + fb_crawl_vectors: 0.5295
+* __fb_wiki_vectors + fb_crawl_vectors: 0.5295__ (our best model)
 * fb_crawl_vectors + filtered_news_vectors: 0.5194
 * fb_wiki_vectors + fb_crawl_vectors: 0.5124
 
@@ -62,5 +62,5 @@ Using agglomerative with linkage = "single" <3 with various vector models
 * KMeans, [2, 6] 0.4058
 * KMeans, [2, 8] 0.4216
 * MiniBatch [2,6] 0.4163
-* MiniBatch [2,7] 0.4324
+* __MiniBatch [2,7] 0.4324__
 * MiniBatch [2,8] 0.4132
