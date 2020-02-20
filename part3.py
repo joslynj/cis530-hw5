@@ -205,7 +205,7 @@ def cluster_with_sparse_representation(word_to_paraphrases_dict, word_to_k_dict)
 
         ### Experiment with different clustering algorithms ###
         # clusters = KMeans(n_clusters=k).fit(vectors_list) # 0.2555
-        clusters = MiniBatchKMeans(n_clusters=k).fit(vectors_list) # 0.2733
+        clusters = AgglomerativeClustering(n_clusters=k, linkage="single").fit(vectors_list) # 0.2733
         # clusters = SpectralClustering(n_clusters=k).fit(vectors_list) # 0.2546
         # clusters = AgglomerativeClustering(n_clusters=k).fit(vectors_list) # 0.2640
         
@@ -260,10 +260,10 @@ def cluster_with_dense_representation(word_to_paraphrases_dict, word_to_k_dict):
         vectors_list = vectors.query(paraphrase_list)
 
         # Create k clusters
-        # clusters = AgglomerativeClustering(n_clusters=k).fit(vectors_list)
+        clusters = AgglomerativeClustering(n_clusters=k, linkage="single").fit(vectors_list)
         # clusters = MiniBatchKMeans(n_clusters=k).fit(vectors_list)
         # clusters = SpectralClustering(n_clusters=k).fit(vectors_list)
-        clusters = KMeans(n_clusters=k).fit(vectors_list)
+        # clusters = KMeans(n_clusters=k).fit(vectors_list)
         cluster_dict = {i: np.where(clusters.labels_ == i)[0] for i in range(clusters.n_clusters)}
         list_of_paraphrases = []
         for key, value in cluster_dict.items():
@@ -294,7 +294,7 @@ def cluster_with_no_k(word_to_paraphrases_dict):
         # TODO: Implement
         vectors_list = vectors.query(paraphrase_list)
         if len(paraphrase_list) <= 2:
-            print(target_word)
+            # print(target_word)
             clusterings[target_word] = [paraphrase_list]
         else:
             # try different k's
@@ -303,14 +303,14 @@ def cluster_with_no_k(word_to_paraphrases_dict):
             highest = [0, 0.0]
             # print(target_word, paraphrase_list)
             # print(target_word, len(paraphrase_list))
-            for k in range(2, min(len(paraphrase_list), 8)):
-                clusters = KMeans(n_clusters=k).fit(vectors_list)
+            for k in range(2, min(len(paraphrase_list), 7)):
+                clusters = MiniBatchKMeans(n_clusters=k).fit(vectors_list)
                 score = silhouette_score(vectors_list, clusters.labels_, metric='euclidean')
                 if score > highest[1]:
                     highest = [k, score]
-            print(target_word, highest)
+            # print(target_word, highest)
 
-            clusters = KMeans(n_clusters=max(highest[0], 2)).fit(vectors_list)
+            clusters = MiniBatchKMeans(n_clusters=max(highest[0], 2)).fit(vectors_list)
             cluster_dict = {i: np.where(clusters.labels_ == i)[0] for i in range(max(highest[0], 2))}
             list_of_paraphrases = []
             for key, value in cluster_dict.items():
